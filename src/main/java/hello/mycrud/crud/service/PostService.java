@@ -39,7 +39,6 @@ public class PostService {
     }
 
     //ID로 게시글 조회
-    @Transactional
     public PostResponseDto findPostById(Long postId) {
         Post findPost = postRepository.findOne(postId);
         User user = findPost.getUser();
