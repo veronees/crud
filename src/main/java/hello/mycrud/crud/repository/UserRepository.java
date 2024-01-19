@@ -2,10 +2,12 @@ package hello.mycrud.crud.repository;
 
 import hello.mycrud.crud.domain.entity.User;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -34,6 +36,20 @@ public class UserRepository {
         return em.createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", nickname)
                 .getResultList();
+    }
+
+    //username으로 조회, 회원가입 시 아이디 중복체크
+    public Optional<User> findByUsername(String username) {
+        try {
+            User user = em.createQuery("select u from User u where u.username = :username", User.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+            return Optional.ofNullable(user);
+        }catch (NoResultException e) {
+            return Optional.empty();
+        }
+
     }
 
     //유저 삭제

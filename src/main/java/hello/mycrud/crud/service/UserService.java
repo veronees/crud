@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,9 +24,17 @@ public class UserService {
 
     //회원가입
     @Transactional
-    public void join(UserRequestDto userRequestDto) {
+    public boolean join(UserRequestDto userRequestDto) {
+        //username(아이디) 중복 체크
+        Optional<User> findByUsername = userRepository.findByUsername(userRequestDto.getUsername());
+
+        if(findByUsername.isPresent()) {
+            return false;
+        }
+
         User user = userEntityDtoConverter.convertToEntity(userRequestDto);
         userRepository.save(user);
+        return true;
     }
 
     // user 정보 수정
@@ -35,24 +44,22 @@ public class UserService {
 
         findUser.changeInfo(name, nickname, gender);
 
-        return UserResponseDto.builder()
-                    .name(findUser.getName())
-                    .nickname(findUser.getNickname())
-                    .gender(findUser.getGender())
-                    .build();
+        return userEntityDtoConverter.convertToDto(findUser);
+
+//        return UserResponseDto.builder()
+//                    .username(findUser.getUsername())
+//                    .nickname(findUser.getNickname())
+//                    .gender(findUser.getGender())
+//                    .build();
     }
 
 
     //user 한명 조회
     public UserResponseDto findOneUser(Long userId) {
         User findUser = userRepository.findOne(userId);
-        UserResponseDto findUserDto = UserResponseDto.builder()
-                .name(findUser.getName())
-                .nickname(findUser.getNickname())
-                .gender(findUser.getGender())
-                .build();
+        UserResponseDto userResponseDto = userEntityDtoConverter.convertToDto(findUser);
 
-        return findUserDto;
+        return userResponseDto;
     }
 
     //user 전부 조회
@@ -60,12 +67,8 @@ public class UserService {
         List<User> findAll = userRepository.findAll();
         List<UserResponseDto> userResponseDtoList = new ArrayList<>();
         for (User user : findAll) {
-            UserResponseDto build = UserResponseDto.builder()
-                    .name(user.getName())
-                    .nickname(user.getNickname())
-                    .gender(user.getGender())
-                    .build();
-            userResponseDtoList.add(build);
+            UserResponseDto userResponseDto = userEntityDtoConverter.convertToDto(user);
+            userResponseDtoList.add(userResponseDto);
         }
 
         return userResponseDtoList;

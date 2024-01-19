@@ -17,9 +17,14 @@ public class User {
     @Column(name = "USER_ID")
     private Long id;
 
-    private String name;
+    private String username;
+
+    private String password;
 
     private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Enumerated(value = EnumType.STRING)
     private Gender gender; //[MAN, WOMAN]
@@ -28,7 +33,7 @@ public class User {
     private List<Post> posts = new ArrayList<>();
 
     public void changeInfo(String name, String nickname, Gender gender) {
-        this.name = name;
+        this.username = name;
         this.nickname = nickname;
         this.gender = gender;
     }
