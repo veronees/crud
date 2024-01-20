@@ -12,7 +12,7 @@ public class JwtUtil {
     public static String createToken(String username, String role, String secretKey, Long expireTimeMs) {
         Claims claims = Jwts.claims();
         claims.put("username", username);
-        claims.put("authorities", List.of(role));
+        claims.put("role", List.of(role)); //List.of는 변경 불가능한 리스트를 만드는 메서드. List에 role집어넣음
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -37,8 +37,8 @@ public class JwtUtil {
                 .get("username", String.class);
     }
 
-    public static List<String> getAuthorities(String token, String secretKey) {
+    public static List<String> getRole(String token, String secretKey) {
         Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        return (List<String>) claims.get("authorities");
+        return (List<String>) claims.get("role");
     }
 }

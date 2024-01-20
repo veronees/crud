@@ -1,6 +1,6 @@
 package hello.mycrud.security.configuration;
 
-import hello.mycrud.security.custom.CustomUserDetailsService;
+//import hello.mycrud.security.custom.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -21,7 +20,7 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final CustomUserDetailsService customUserDetailsService;
+//    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -43,8 +42,8 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
         http
                 .addFilterBefore(new JwtFilter(secretKey), UsernamePasswordAuthenticationFilter.class);
-        http
-                .userDetailsService(customUserDetailsService);
+//        http
+//                .userDetailsService(customUserDetailsService);
 
         return http.build();
     }

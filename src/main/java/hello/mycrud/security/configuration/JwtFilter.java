@@ -22,6 +22,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final String secretKey;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        //요청 헤더에서 Authorization꺼내기. 여기에 token값이 넘어옴
         String authorization = request.getHeader("Authorization");
 
 
@@ -32,16 +34,21 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         //jwt 꺼내기
+        //Bearer asdjfakehfl.wehfuiasdf12.faewfa << 이런식의 토큰값이라 앞에 "Bearer "를 짤라냄
         String token = authorization.split(" ")[1];
 
+
+        //token 만료 되었는지 check
         if(JwtUtil.isExpired(token, secretKey)) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        //claims에 넣어둔 username값 꺼내기
         String username = JwtUtil.getUsername(token, secretKey);
 
-        List<String> authorities = JwtUtil.getAuthorities(token, secretKey);
+        //claims에 넣어둔 role이 저장되어있는 List꺼내기
+        List<String> role = JwtUtil.getRole(token, secretKey);
 
 
 
@@ -49,10 +56,10 @@ public class JwtFilter extends OncePerRequestFilter {
 //        UsernamePasswordAuthenticationToken authenticationToken =
 //                new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority("ADMIN")));
 
-
+        //권한 부여
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(username, null,
-                        authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+                        role.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
 
 
         //Detail을 넣어준다.
