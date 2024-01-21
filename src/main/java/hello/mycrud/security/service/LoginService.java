@@ -35,7 +35,8 @@ public class LoginService {
             return "비밀번호가 일치하지 않습니다.";
         }
         String role = String.valueOf(user.getRole());
-        String token = JwtUtil.createToken(user.getUsername(), role, secretKey, expireTimeMs);
+//        String token = JwtUtil.createToken(user.getUsername(), role, secretKey, expireTimeMs);
+        String token = JwtUtil.createToken(user.getUsername(), secretKey, expireTimeMs);
 
         return token;
 

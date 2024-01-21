@@ -3,16 +3,41 @@ package hello.mycrud.crud.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
-    public static String createToken(String username, String role, String secretKey, Long expireTimeMs) {
+    private final UserDetailsService customUserDetailsService;
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+//    public static String createToken(String username, String role, String secretKey, Long expireTimeMs) {
+//        Claims claims = Jwts.claims();
+//        claims.put("username", username);
+//        claims.put("role", List.of(role)); //List.of는 변경 불가능한 리스트를 만드는 메서드. List에 role집어넣음
+//        return Jwts.builder()
+//                .setClaims(claims)
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .setExpiration(new Date(System.currentTimeMillis() + expireTimeMs))
+//                .signWith(SignatureAlgorithm.HS256, secretKey)
+//                .compact();
+//    }
+
+    public static String createToken(String username, String secretKey, Long expireTimeMs) {
         Claims claims = Jwts.claims();
         claims.put("username", username);
-        claims.put("role", List.of(role)); //List.of는 변경 불가능한 리스트를 만드는 메서드. List에 role집어넣음
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -40,5 +65,12 @@ public class JwtUtil {
     public static List<String> getRole(String token, String secretKey) {
         Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         return (List<String>) claims.get("role");
+    }
+
+    public Authentication getAuthentication(String token) {
+        String username = getUsername(token, secretKey);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        System.out.println("userDetails.getClass() = " + userDetails.getClass());
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }
