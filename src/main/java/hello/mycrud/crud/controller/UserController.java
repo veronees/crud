@@ -40,12 +40,6 @@ public class UserController {
     //전체 회원 리스트 보기 (ADMIN만 접근 가능)
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDto>> findAll(Authentication authentication) {
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        for (GrantedAuthority authority : authorities) {
-            String role = authority.getAuthority();
-            System.out.println("role = " + role);
-        }
-
         List<UserResponseDto> findAllUser = userService.findAllUsers();
         return ResponseEntity.ok(findAllUser);
     }

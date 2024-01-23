@@ -24,22 +24,78 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         /**
          * UserDetailsService, UserDetails를 사용한 인증 로직
          */
         //헤더에서 토큰 꺼내기
         String token = request.getHeader("Authorization");
         System.out.println("token = " + token);
+
         if (token != null){
             String jwt = token.split(" ")[1];
-            if (!JwtUtil.isExpired(jwt, secretKey)) {
-                Authentication authentication = jwtUtil.getAuthentication(jwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            String tokenType = JwtUtil.getTokenType(jwt, secretKey);
+            if (request.getRequestURI().equals("/reissue")) {
+                if (!JwtUtil.isExpired(jwt, secretKey) && tokenType.equals("refreshToken")) {
+                    Authentication authentication = jwtUtil.getAuthentication(jwt);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+            else {
+                if (!JwtUtil.isExpired(jwt, secretKey) && tokenType.equals("accessToken")) {
+                    Authentication authentication = jwtUtil.getAuthentication(jwt);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+            filterChain.doFilter(request, response);
         }
-
         filterChain.doFilter(request, response);
+    }
+}
+//        //헤더에서 토큰 꺼내기
+//        String token = request.getHeader("Authorization");
+//        String requestURI = request.getRequestURI();
+//        System.out.println("requestURI = " + requestURI);
+//
+//        if (token != null) {
+//            String jwt = token.split(" ")[1];
+//            String tokenType = JwtUtil.getTokenType(jwt, secretKey);
+//
+//            //"/reissue"를 제외한 모든 URI에서
+//            if (requestURI != "/reissue") {
+//                //tokenType이 리프레시토큰이면
+//                if (tokenType == "refreshToken") {
+//                    filterChain.doFilter(request, response);
+//                    return;
+//                }
+//                System.out.println("token = " + token);
+//                //에세스 토큰이면
+//                if (tokenType == "accessToken") {
+//                    if (!JwtUtil.isExpired(jwt, secretKey)) {
+//                        Authentication authentication = jwtUtil.getAuthentication(jwt);
+//                        SecurityContextHolder.getContext().setAuthentication(authentication);
+//                    }
+//                }
+//
+//                filterChain.doFilter(request, response);
+//            }
+//
+//            if (requestURI == "/reissue") {
+//                if (tokenType == "refreshToken") {
+//                    if (!JwtUtil.isExpired(jwt, secretKey)) {
+//                        Authentication authentication = jwtUtil.getAuthentication(jwt);
+//                        SecurityContextHolder.getContext().setAuthentication(authentication);
+//                    }
+//                }
+//                if (tokenType == "accessToken") {
+//                    filterChain.doFilter(request, response);
+//                    return;
+//                }
+//            }
+//        }
+//
+//        filterChain.doFilter(request, response);
+
+
 
 
         /**
@@ -83,5 +139,3 @@ public class JwtFilter extends OncePerRequestFilter {
 //        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 //        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 //        filterChain.doFilter(request, response);
-    }
-}

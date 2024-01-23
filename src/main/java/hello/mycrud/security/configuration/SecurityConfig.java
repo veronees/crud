@@ -10,9 +10,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -22,8 +24,10 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String secretKey;
 
-//    private final CustomUserDetailsService customUserDetailsService;
+    //    private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
+
+    private final LogoutHandler logoutService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -53,8 +57,14 @@ public class SecurityConfig {
                 );
         http
                 .addFilterBefore(new JwtFilter(secretKey, jwtUtil), UsernamePasswordAuthenticationFilter.class); //jwt 필터
-//        http
-//                .userDetailsService(customUserDetailsService);
+
+        http
+                .logout(logoutConfig -> { logoutConfig
+                        .logoutUrl("/logout")
+                        .addLogoutHandler(logoutService)
+                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()));
+
+                });
 
         return http.build();
     }

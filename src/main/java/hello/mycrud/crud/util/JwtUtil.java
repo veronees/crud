@@ -1,5 +1,6 @@
 package hello.mycrud.crud.util;
 
+import hello.mycrud.security.domain.dto.JwtDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,6 +24,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
+
 //    public static String createToken(String username, String role, String secretKey, Long expireTimeMs) {
 //        Claims claims = Jwts.claims();
 //        claims.put("username", username);
@@ -35,15 +37,57 @@ public class JwtUtil {
 //                .compact();
 //    }
 
-    public static String createToken(String username, String secretKey, Long expireTimeMs) {
-        Claims claims = Jwts.claims();
-        claims.put("username", username);
-        return Jwts.builder()
-                .setClaims(claims)
+    public static JwtDto createToken(String username, String secretKey) {
+        final Long accessTokenExpired = 1000 * 60 * 30L; //30분
+        final Long refreshTokenExpired = 1000 * 60 * 60 * 24L; //1일
+        final String[] tokenType = {"accessToken", "refreshToken"};
+
+
+
+        Claims accessClaims = Jwts.claims();
+        accessClaims.put("username", username);
+        accessClaims.put("tokenType", tokenType[0]);
+
+        String accessToken = Jwts.builder()
+                .setClaims(accessClaims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expireTimeMs))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpired))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+        Claims refreshClaims = Jwts.claims();
+        refreshClaims.put("username", username);
+        refreshClaims.put("tokenType", tokenType[1]);
+
+        String refreshToken = Jwts.builder()
+                .setClaims(refreshClaims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpired))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+
+        return JwtDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public static String reIssueAccessToken(String username, String secretKey) {
+        final Long accessTokenExpired = 1000 * 60 * 30L; //30분
+        final String tokenType = "accessToken";
+        Claims claims = Jwts.claims();
+        claims.put("username", username);
+        claims.put("tokenType", tokenType);
+        String accessToken = Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpired))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
+
+        return accessToken;
+
+
+
     }
 
     public static boolean isExpired(String token, String secretKey) {
@@ -60,6 +104,13 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("username", String.class);
+    }
+
+    public static String getTokenType(String token, String secretKey) {
+        return Jwts.parserBuilder().setSigningKey(secretKey).build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("tokenType", String.class);
     }
 
     public static List<String> getRole(String token, String secretKey) {

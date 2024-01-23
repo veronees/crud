@@ -1,4 +1,4 @@
-package hello.mycrud.security.dto;
+package hello.mycrud.security.domain.dto;
 
 import lombok.Getter;
 import lombok.Setter;
