@@ -41,7 +41,7 @@ public class Comment {
                                    //이게 null인 행은 최상위 계층인 것임.
 
     @OneToMany(mappedBy = "parentComment")
-    private List<Comment> childComments = new ArrayList<>(); //
+    private List<Comment> childComments = new ArrayList<>();
 
 
     //-----------메서드----------//

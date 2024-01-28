@@ -29,7 +29,6 @@ public class PostEntityDtoConverter {
                 .content(dto.getContent())
                 .createdDate(LocalDateTime.now())
                 .lastModifiedDate(LocalDateTime.now())
-                .viewCount(dto.getViewCount())
                 .build();
         return entity;
     }

@@ -1,7 +1,7 @@
 package hello.mycrud.security.custom;
 
 import hello.mycrud.crud.domain.entity.User;
-import hello.mycrud.crud.repository.UserRepository;
+import hello.mycrud.crud.repository.jparepository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserJpaRepository userRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 

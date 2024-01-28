@@ -13,6 +13,5 @@ public class PostRequestDto {
     private Long userId;
     private String title;
     private String content;
-    private int viewCount;
 
 }

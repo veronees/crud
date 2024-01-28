@@ -1,7 +1,7 @@
 package hello.mycrud.security.service;
 
 import hello.mycrud.crud.domain.entity.User;
-import hello.mycrud.crud.repository.UserRepository;
+import hello.mycrud.crud.repository.jparepository.UserJpaRepository;
 import hello.mycrud.crud.util.JwtUtil;
 import hello.mycrud.security.domain.dto.JwtDto;
 import hello.mycrud.security.domain.dto.LoginRequestDTO;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LoginService {
 
-    private final UserRepository userRepository;
+    private final UserJpaRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Value("${jwt.secret}")
     private String secretKey;

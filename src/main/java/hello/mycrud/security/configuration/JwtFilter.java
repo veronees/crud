@@ -6,16 +6,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
@@ -46,57 +41,10 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-            filterChain.doFilter(request, response);
         }
         filterChain.doFilter(request, response);
     }
 }
-//        //헤더에서 토큰 꺼내기
-//        String token = request.getHeader("Authorization");
-//        String requestURI = request.getRequestURI();
-//        System.out.println("requestURI = " + requestURI);
-//
-//        if (token != null) {
-//            String jwt = token.split(" ")[1];
-//            String tokenType = JwtUtil.getTokenType(jwt, secretKey);
-//
-//            //"/reissue"를 제외한 모든 URI에서
-//            if (requestURI != "/reissue") {
-//                //tokenType이 리프레시토큰이면
-//                if (tokenType == "refreshToken") {
-//                    filterChain.doFilter(request, response);
-//                    return;
-//                }
-//                System.out.println("token = " + token);
-//                //에세스 토큰이면
-//                if (tokenType == "accessToken") {
-//                    if (!JwtUtil.isExpired(jwt, secretKey)) {
-//                        Authentication authentication = jwtUtil.getAuthentication(jwt);
-//                        SecurityContextHolder.getContext().setAuthentication(authentication);
-//                    }
-//                }
-//
-//                filterChain.doFilter(request, response);
-//            }
-//
-//            if (requestURI == "/reissue") {
-//                if (tokenType == "refreshToken") {
-//                    if (!JwtUtil.isExpired(jwt, secretKey)) {
-//                        Authentication authentication = jwtUtil.getAuthentication(jwt);
-//                        SecurityContextHolder.getContext().setAuthentication(authentication);
-//                    }
-//                }
-//                if (tokenType == "accessToken") {
-//                    filterChain.doFilter(request, response);
-//                    return;
-//                }
-//            }
-//        }
-//
-//        filterChain.doFilter(request, response);
-
-
-
 
         /**
          * JWT에서 username이랑 role 꺼내서 안증하는 로직(UserDetailsService사용 x)

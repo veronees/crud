@@ -3,32 +3,12 @@ package hello.mycrud.crud.repository;
 import hello.mycrud.crud.domain.entity.Like;
 import hello.mycrud.crud.domain.entity.Post;
 import hello.mycrud.crud.domain.entity.User;
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-@Repository
-@RequiredArgsConstructor
-public class LikeRepository {
+public interface LikeRepository extends JpaRepository<Like, Long> {
 
-    private final EntityManager em;
-
-    //
-    public void save(Like like) {
-        em.persist(like);
-    }
-
-    public void delete(Like like) {
-        em.remove(like);
-    }
-
-    public Like findByPostAndUser(Post post, User user) {
-        Like result = em.createQuery("SELECT l FROM Like l WHERE l.post = :post AND l.user = :user", Like.class)
-                .setParameter("post", post)
-                .setParameter("user", user)
-                .getSingleResult();
-
-        return result;
-    }
-
+    @Query("select l from Like l where l.post = :post and l.user = :user")
+    Like findByPostIdAndUserId(@Param("post") Post post, @Param("user")User user);
 }
