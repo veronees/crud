@@ -4,12 +4,16 @@ import hello.mycrud.crud.domain.entity.Post;
 import hello.mycrud.crud.domain.entity.User;
 import hello.mycrud.crud.domain.requestdto.PostRequestDto;
 import hello.mycrud.crud.domain.responsedto.PostResponseDto;
+import hello.mycrud.crud.repository.CommentRepository;
+import hello.mycrud.crud.repository.LikeRepository;
 import hello.mycrud.crud.repository.PostRepository;
 import hello.mycrud.crud.repository.UserRepository;
 import hello.mycrud.crud.repository.jparepository.PostJpaRepository;
 import hello.mycrud.crud.repository.jparepository.UserJpaRepository;
 import hello.mycrud.crud.util.PostEntityDtoConverter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +29,8 @@ public class PostService {
     private final PostEntityDtoConverter postEntityDtoConverter;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
-//    //게시글 db에 저장
-//    @Transactional
-//    public void createPost(PostRequestDto postRequestDto) {
-//        User user = userJpaRepository.findOne(postRequestDto.getUserId());
-//        Post post = postEntityDtoConverter.convertToEntity(postRequestDto, user);
-//        postJpaRepository.save(post);
-//    }
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public void createPostV2(PostRequestDto postRequestDto) {
@@ -44,12 +42,15 @@ public class PostService {
 
     @Transactional
     public void deletePostV2(Long postId) {
+        commentRepository.deleteCommentByPostId(postId);
+        likeRepository.deleteLikeByPost(postId);
         postRepository.deleteById(postId);
     }
 
     @Transactional
     public PostResponseDto findPostByIdV2(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("게시글 x"));
+        Post post = postRepository.findFetchById(postId).orElseThrow(() -> new RuntimeException("게시글 x"));
+//        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("게시글 x"));
         User user = post.getUser();
         Long userId = user.getId();
         post.updateViewCount();
@@ -76,8 +77,23 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("게시글 x"));
         post.updateTitle(title);
         post.updateContent(content);
-        post.updateLastModifiedDate();
+//        post.updateLastModifiedDate();
     }
+
+    //Spring Data Jpa이용한 페이징
+    public Page<PostResponseDto> paging(Pageable pageable) {
+        Page<Post> page = postRepository.findAll(pageable);
+        Page<PostResponseDto> pageDto = page.map(post -> new PostResponseDto(post.getUser().getId(), post.getTitle(), post.getContent(), post.getViewCount(), post.getLikeCount(), post.getComments().size()));
+        return pageDto;
+    }
+
+    //    //게시글 db에 저장
+//    @Transactional
+//    public void createPost(PostRequestDto postRequestDto) {
+//        User user = userJpaRepository.findOne(postRequestDto.getUserId());
+//        Post post = postEntityDtoConverter.convertToEntity(postRequestDto, user);
+//        postJpaRepository.save(post);
+//    }
 
 //    //게시글 삭제
 //    @Transactional
@@ -144,23 +160,23 @@ public class PostService {
 //        return postResponseDtos;
 //    }
 
-    //한 페이지당 10개 게시글로 잡았고, 해당 페이지의 게시글들 조회(POST_ID높은순(즉 가장 최근에 작성된 글)으로 10개씩 1페이지, 2페이지 이렇게 쭉쭉)
-    public List<PostResponseDto> findPostByPageNum(int pageNum) {
-        List<Post> allByPage = postJpaRepository.findAllByPage(pageNum);
-        List<PostResponseDto> postResponseDtos = new ArrayList<>();
-        for (Post post : allByPage) {
-            PostResponseDto dto = PostResponseDto.builder()
-                    .userId(post.getUser().getId())
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .viewCount(post.getViewCount())
-                    .likeCount(post.getLikeCount())
-                    .commentCount(post.getComments().size())
-                    .build();
-            postResponseDtos.add(dto);
-        }
-        return postResponseDtos;
-    }
+//    //한 페이지당 10개 게시글로 잡았고, 해당 페이지의 게시글들 조회(POST_ID높은순(즉 가장 최근에 작성된 글)으로 10개씩 1페이지, 2페이지 이렇게 쭉쭉)
+//    public List<PostResponseDto> findPostByPageNum(int pageNum) {
+//        List<Post> allByPage = postJpaRepository.findAllByPage(pageNum);
+//        List<PostResponseDto> postResponseDtos = new ArrayList<>();
+//        for (Post post : allByPage) {
+//            PostResponseDto dto = PostResponseDto.builder()
+//                    .userId(post.getUser().getId())
+//                    .title(post.getTitle())
+//                    .content(post.getContent())
+//                    .viewCount(post.getViewCount())
+//                    .likeCount(post.getLikeCount())
+//                    .commentCount(post.getComments().size())
+//                    .build();
+//            postResponseDtos.add(dto);
+//        }
+//        return postResponseDtos;
+//    }
 
 
 
@@ -170,22 +186,22 @@ public class PostService {
 
 
 
+//
+//    //뷰에서 페이지 번호 1~10 이런식으로 밑에 뛰우는거에 필요한 메서드인데 지금 당장 필요 없음
+//    private int[] pageList() {
+//        int totalPage = countPost() / 10; //게시글 총 100개이면 10으로 나눳을 때 몫인 10 즉 페이지 갯수 10개
+//        totalPage = (countPost() % 10 == 0) ? totalPage : totalPage + 1;
+//
+//        int[] pages = new int[totalPage];
+//        for(int i = 0; i < totalPage; i++) {
+//            pages[i] = i + 1;
+//        }
+//
+//        return pages;
+//    }
 
-    //뷰에서 페이지 번호 1~10 이런식으로 밑에 뛰우는거에 필요한 메서드인데 지금 당장 필요 없음
-    private int[] pageList() {
-        int totalPage = countPost() / 10; //게시글 총 100개이면 10으로 나눳을 때 몫인 10 즉 페이지 갯수 10개
-        totalPage = (countPost() % 10 == 0) ? totalPage : totalPage + 1;
-
-        int[] pages = new int[totalPage];
-        for(int i = 0; i < totalPage; i++) {
-            pages[i] = i + 1;
-        }
-
-        return pages;
-    }
-
-    //전체 게시글 개수
-    private int countPost() {
-        return postJpaRepository.findAll().size();
-    }
+//    //전체 게시글 개수
+//    private int countPost() {
+//        return postJpaRepository.findAll().size();
+//    }
 }

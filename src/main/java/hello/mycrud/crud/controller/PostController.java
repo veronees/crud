@@ -5,6 +5,10 @@ import hello.mycrud.crud.domain.requestdto.PostRequestDto;
 import hello.mycrud.crud.domain.responsedto.PostResponseDto;
 import hello.mycrud.crud.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,13 +50,29 @@ public class PostController {
         return new ResponseEntity<>("게시글 삭제 완료", HttpStatus.OK);
     }
 
-    //페이징 --> 해당 파라미터값 페이지마다 10개씩 게시글 조회
-    @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getPostByPage(@RequestParam int pageNum) {
-        List<PostResponseDto> postsByPageNum = postService.findPostByPageNum(pageNum);
-
-        return ResponseEntity.ok(postsByPageNum);
+    //최근 생성일 순
+    @GetMapping("/posts")
+    public ResponseEntity<Page<PostResponseDto>> getPostByPageV2(Pageable pageable) {
+        Page<PostResponseDto> paging = postService.paging(pageable);
+        return ResponseEntity.ok(paging);
     }
+
+    //생성일 가장 오래된 순
+    @GetMapping("/posts/late")
+    public ResponseEntity<Page<PostResponseDto>> getPostByPageSortCreatedDescV2(@PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<PostResponseDto> paging = postService.paging(pageable);
+        return ResponseEntity.ok(paging);
+    }
+
+    //좋아요 많은 순서
+    @GetMapping("/posts/best-like")
+    public ResponseEntity<Page<PostResponseDto>> getPostByPageSortBestLikeV2(@PageableDefault(sort = "likeCount", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<PostResponseDto> paging = postService.paging(pageable);
+        return ResponseEntity.ok(paging);
+    }
+
+
+
 }
 
 
@@ -90,11 +110,20 @@ public class PostController {
 //        return new ResponseEntity<>("게시글 삭제 완료", HttpStatus.OK);
 //    }
 
+//페이징 --> 해당 파라미터값 페이지마다 10개씩 게시글 조회
+//    @GetMapping
+//    public ResponseEntity<List<PostResponseDto>> getPostByPage(@RequestParam int pageNum) {
+//        List<PostResponseDto> postsByPageNum = postService.findPostByPageNum(pageNum);
+//
+//        return ResponseEntity.ok(postsByPageNum);
+//    }
+
 /*    // 특정 키워드로 게시글 검색 //다다다다다다다다ㅣ시시시시시ㅣ시 만들어야야야됌
     @GetMapping("/search")
     public ResponseEntity<List<PostResponseDto>> searchPosts(@RequestParam String keyword) {
         List<PostResponseDto> postResponseDtos = postService.searchPosts(keyword);
         return ResponseEntity.ok(postResponseDtos);
     }*/
+
 
 

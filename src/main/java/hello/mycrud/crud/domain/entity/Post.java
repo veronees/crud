@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Post {
+public class Post extends BaseTimeEntity {
 
     @Id @GeneratedValue
     @Column(name = "POST_ID")
@@ -29,10 +29,6 @@ public class Post {
     private String title;
 
     private String content;
-
-    private LocalDateTime createdDate;
-
-    private LocalDateTime lastModifiedDate;
 
     private int viewCount;
 
@@ -53,7 +49,9 @@ public class Post {
 //    }
 
     public int countComments() {
+        System.out.println("================");
         int count = this.comments.size();
+        System.out.println("================");
         return count;
     }
 
@@ -66,9 +64,9 @@ public class Post {
         this.content = newContent;
     }
 
-    public void updateLastModifiedDate() {
-        this.lastModifiedDate = LocalDateTime.now();
-    }
+//    public void updateLastModifiedDate() {
+//        this.lastModifiedDate = LocalDateTime.now();
+//    }
 
     public void updateViewCount() {
         this.viewCount += 1;

@@ -9,5 +9,10 @@ spring:
     username: root
     password: 1234567890
     driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 2000
 jwt:
   secret: "secretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeyqowjfasjdklfhaskdjfhaskljdfahfaskljdhfalksjdfhaslkjdfhaslkjdfh"

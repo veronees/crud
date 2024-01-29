@@ -110,6 +110,12 @@ public class CommentService {
 
     public void deleteCommentV2(Long postId, Long commentId) {
         Comment comment = commentRepository.findByPostIdAndId(postId, commentId);
+
+        //부모 댓글이 없고, 자식 댓글이 있으면
+        if (comment.getParentComment() == null && !comment.getChildComments().isEmpty()) {
+            comment.deleteContent();
+            return;
+        }
         commentRepository.delete(comment);
     }
 

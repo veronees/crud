@@ -27,8 +27,8 @@ public class PostEntityDtoConverter {
                 .user(user)
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .createdDate(LocalDateTime.now())
-                .lastModifiedDate(LocalDateTime.now())
+//                .createdDate(LocalDateTime.now())
+//                .lastModifiedDate(LocalDateTime.now())
                 .build();
         return entity;
     }

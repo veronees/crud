@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue
     @Column(name = "COMMENT_ID")
@@ -31,9 +31,9 @@ public class Comment {
 
     private String content;
 
-    private LocalDateTime createdDate;
-
-    private LocalDateTime lastModifiedDate;
+//    private LocalDateTime createdDate;
+//
+//    private LocalDateTime lastModifiedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARENT_COMMENT_ID")
@@ -48,7 +48,11 @@ public class Comment {
 
     public void modifiedContent(String content) {
         this.content = content;
-        this.lastModifiedDate = LocalDateTime.now();
+//        this.lastModifiedDate = LocalDateTime.now();
+    }
+
+    public void deleteContent() {
+        this.content = "삭제된 댓글입니다.";
     }
 
 }

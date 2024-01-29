@@ -18,8 +18,8 @@ public class CommentEntityDtoConverter {
                 .user(user)
                 .parentComment(comment)
                 .content(commentRequestDto.getContent())
-                .createdDate(LocalDateTime.now())
-                .lastModifiedDate(LocalDateTime.now())
+//                .createdDate(LocalDateTime.now())
+//                .lastModifiedDate(LocalDateTime.now())
                 .build();
 
         return entity;
